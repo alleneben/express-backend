@@ -11,30 +11,41 @@ router.get('/', function(request, response){
 })
 
 
-router.post("/login", function(request,response){
-    const { firstname, lastname, email, mobileno, username, password } = request.body
-    
-    // let user = users.filter(arrayelement => arrayelement.username === username)
-    
-    // if(user.length == 1){
-        
-    //     if(user[0].password === password){
-    //         response.send("Login successful")
-    //     }
-    //     response.send("user or password is wrong")
-    // } else {
-    //     response.send("User does not exit")
-    // }
+router.post("/login", async (request,response) => {
+    const { email, password } = request.body
+    // console.log(email);
+    let responseData = await usermodel.findOne({email})
+    console.log(responseData);
+    if(responseData){
+        if(password === responseData.password){
+            response.status(200).send({message:"Successful"})
+        } else {
+            response.status(200).send({message:"wrong username or password"})
+        }
+    } else {
+
+        response.status(400).send({message:"User does not exist"})
+    }
+
+
+
 })
 
 router.post('/signup', async (request,response) => {
     const { firstname, lastname, email,password } = request.body
 
-    let userModel = new usermodel({firstname, lastname, email, password})
-
-    let responseData =  await userModel.save()
-
+    const responseData = {};
+    try {
+        let newuser = new usermodel({firstname, lastname, email, password})
+    
+         responseData =  await newuser.save()
+    } catch (error) {
+        response.status(400).send({message:error})
+        
+    }
+    
     response.status(200).send({message:"you have successfully signed up. You can login now!!!", data: responseData})
+
 })
 
 
